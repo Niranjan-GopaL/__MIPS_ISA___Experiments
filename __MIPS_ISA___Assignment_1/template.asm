@@ -3,42 +3,57 @@
 #system calls by MARS simulator:
 #http://courses.missouristate.edu/kenvollmar/mars/help/syscallhelp.html
 .data
-	next_line: .asciiz "\n"
-	inp_statement: .asciiz "Enter No. of integers to be taken as input: "
-	inp_int_statement: .asciiz "Enter starting address of inputs(in decimal format): "
-	out_int_statement: .asciiz "Enter starting address of outputs (in decimal format): "
-	enter_int: .asciiz "Enter the integer: "	
+	next_line:         .asciiz   "\n"
+	inp_statement:     .asciiz   "Enter No. of integers to be taken as input: "
+	inp_int_statement: .asciiz   "Enter starting address of inputs(in decimal format): "
+	out_int_statement: .asciiz   "Enter starting address of outputs (in decimal format): "
+	enter_int:         .asciiz   "Enter the integer: "	
+
+
+
 .text
+
+
 #input: N= how many numbers to sort should be entered from terminal. 
-#It is stored in $t1
+#  N -> $t1
 jal print_inp_statement	
 jal input_int 
 move $t1,$t4			
 
 #input: X=The Starting address of input numbers (each 32bits) should be entered from
-# terminal in decimal format. It is stored in $t2
+# terminal in decimal format. 
+# X -> $t2  (input adress)
 jal print_inp_int_statement
 jal input_int
 move $t2,$t4
 
 #input:Y= The Starting address of output numbers(each 32bits) should be entered
-# from terminal in decimal. It is stored in $t3
+# from terminal in decimal. 
+# Y -> $t3 (output adress)
 jal print_out_int_statement
 jal input_int
 move $t3,$t4 
 
+
+
 #input: The numbers to be sorted are now entered from terminal.
 # They are stored in memory array whose starting address is given by $t2
-move $t8,$t2
-move $s7,$zero	#i = 0
+
+move $t8,$t2    # temporily store t2 -> t8
+move $s7,$zero	# loop vairable (i)  -> s7
 loop1:  beq $s7,$t1,loop1end
 	jal print_enter_int
 	jal input_int
+
+    # store user inputs to an array starting from t2
 	sw $t4,0($t2)
-	addi $t2,$t2,4
-      	addi $s7,$s7,1
-        j loop1      
-loop1end: move $t2,$t8       
+	addi $t2,$t2,4      # updating t2 to have t2+4 value
+      	addi $s7,$s7,1  # s7 ++
+        j loop1         # jump to top
+
+loop1end: move $t2,$t8  # t2's value restored from t8  
+
+
 #############################################################
 #Do not change any code above this line
 #Occupied registers $t1,$t2,$t3. Don't use them in your sort function.
@@ -46,28 +61,24 @@ loop1end: move $t2,$t8
 #function: should be written by students(sorting function)
 #The below function adds 10 to the numbers. You have to replace this with
 #your code
+
+
 lw $s3,0($t2)
 addi $s3,$s3,10
 sw $s3,0($t3)
 lw $s3,4($t2)
 addi $s3,$s3,10
 sw $s3,4($t3)
+
+
+
+
 #endfunction
 #############################################################
 #You need not change any code below this line
 
-#print sorted numbers
-move $s7,$zero	#i = 0
-loop: beq $s7,$t1,end
-      lw $t4,0($t3)
-      jal print_int
-      jal print_line
-      addi $t3,$t3,4
-      addi $s7,$s7,1
-      j loop 
-#end
-end:  li $v0,10
-      syscall
+
+
 #input from command line(takes input and stores it in $t6)
 input_int: li $v0,5
 	   syscall
@@ -104,3 +115,18 @@ print_enter_int: li $v0,4
 		la $a0,enter_int
 		syscall 
 		jr $ra
+
+
+
+#print sorted numbers
+move $s7,$zero	#i = 0
+loop: beq $s7,$t1,end
+      lw $t4,0($t3)
+      jal print_int
+      jal print_line
+      addi $t3,$t3,4
+      addi $s7,$s7,1
+      j loop 
+#end
+end:  li $v0,10
+      syscall
