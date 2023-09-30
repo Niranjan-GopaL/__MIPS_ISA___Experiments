@@ -1,3 +1,4 @@
+# data that we need to have in random access memory
 .data
 	next_line:              .asciiz   "\n"
 	inp_statement:          .asciiz   "Enter No. of integers to be taken as input: "
@@ -5,8 +6,16 @@
 	out_int_statement:      .asciiz   "Enter starting address of outputs (in decimal format): "
 	enter_int:              .asciiz   "Enter the integer: "
 
-
 .text
+
+
+'
+## to do:-
+
+- no need of next_line ?
+
+'
+
 
 # conventions being followed :-
 # N ( number of inputs )         -> t0 
@@ -21,87 +30,115 @@ move 	$t0, $t4		# $t0 <- $t4
 
 jal		print_input_starting_address  
 jal     get_input_int
-move 	$t0, $t4		# $t1 <- $t4
+move 	$t1, $t4		# $t1 <- $t4
 
 
 
 jal		print_output_starting_adress 
 jal     get_input_int
-move 	$t0, $t4		# $t2 <- $t4
+move 	$t2, $t4		# $t2 <- $t4
 
 
 
 move    $t8, $t1     # temporily store t1 -> t8
-move    $s0, $zero	# loop vairable (i)  -> s0
+move    $s0, $zero	 # loop vairable (i)  -> s0
 
-loop1:  beq $s0, $t0, loop1end
+loop1:  
+        beq $s0, $t0, loop1end
 
 	    jal print_enter_int_from_user
 	    jal get_input_int
         # store user inputs to an array starting from t2
 	    sw $t4, 0($t1)
 
-	    addi $t1, $t1, 4      # updating t1 to have t1+4 value
-      	addi $s0, $s0, 1      # s0 ++
-        j loop1               # jump to top
+	    addi $t1, $t1, 4        # updating t1 to have t1 + 4 value
+      	addi $s0, $s0, 1        # s0++
+        j loop1                 # jump to top
 
-loop1end: move $t1, $t8  # t1's value restored from t8  
-
-
-
-# Bubble Sort
-        move    $s1, $t0  # $s1 <- N (number of elements)
-        move    $t8, $t1
-        li      $s2, 1    # $s2 <- swap flag is 1
-
-sort_loop:
-        # If swap flag is 0, the array is sorted
-        # s2 == 0 --> jump to sorted
-        beqz    $s2, sorted  
-
-        li      $s2, 0       # Reset swap flag to 0 (false)
-        move    $s0, $zero   # Reset loop variable (i) to 0
-
-inner_loop:
-    beq     $s0, $s1, sort_loop  # If i == N, go to the outer loop
-
-    # Load A[i] and A[i+1]
-    lw      $t3, 0($t1)
-    lw      $t4, 4($t1)
-
-    # A[i] <= A[i+1] => no swap
-    ble     $t3, $t4, no_swap
-
-    # Swap A[i] and A[i+1]
-    sw      $t4, 0($t1)
-    sw      $t3, 4($t1)
-
-    # Set swap flag to 1 => Not Sorted
-    li      $s2, 1
-
-no_swap:
-    addi    $t1, $t1, 4  # Move to the next element
-    addi    $s0, $s0, 1  # Increment loop counter
-    j       inner_loop    # Repeat inner loop
+loop1end: 
+        move $t1, $t8          # t1's value restored from t8  
 
 
 
-sorted:
-    # Print the sorted integers
-    move    $t1, $t8  # Restore $t1's value from $t8
-    li      $s0, 0    # Reset loop variable (i) to 0
+'''
+for i: 0 -> n
+    for j: 0 -> (n-i)-1
+        if( A[j] > A[j+1] ) swap( A[j], A[j+1] )
 
+
+after every iteration of inner loop;
+(i+1)th  largest number will be at its proper position
+'''
+
+'''
+$t1 <----- stores StartingAddress for input
+
+M[t1  ] = first  input
+M[t1+4] = second input
+M[t1+8] = third  input
+
+M[26850128] = 4
+M[26850132] = 1
+M[26850136] = 2
+and so on ...
+
+
+=> EVERYTHING IS ZERO INDEXED 
+'''
+
+
+# just code; debug later
+# Bubble sort
+
+# i <- s0 <- outer_loop variable
+# j <- s1 <- inner_loop variable
+
+
+# outer loop initialisation
+li    $s0,  -1		
+
+outer_loop:
+    addi    $s0, $s0, 1             # i++
+    beq     $s0, $t0, print_sorted_loop
+
+    # inner loop initialisation
+    li	    $s1, 0		            # j = 0
+    sub		$t2, $t0, $s0		    # $t2 <- N - i    ( you can do this using one register)
+
+    inner_loop:
+    beq     $s1, $t2, outer_loop    # j == N - i go to outer lopp
+
+
+    lw      $s3, 0($t1)             # A[j]
+    lw      $s4, 4($t1)             # A[j+1]
+
+
+    ble		$s3, $s4, no_swap       # Only if A[j] > A[j+1] we'll swap
+
+    # swapping
+    move    $t7, $s4
+    move    $s4, $s3
+    move    $s3, $t7
+
+    no_swap:
+    addi     $s1, $s1, 1            # j++
+    j		inner_loop				# next iteration of inner loop
+
+
+
+
+li		$s0, 0		 
 print_sorted_loop:
-    beq     $s0, $t0, done  # If i == N, exit
+        beq     $s0, $t0, done  # If i == N, exit
 
-    # Load and print the integer at address $t1
-    lw      $t4, 0($t1)
-    jal     print_int
-    jal     print_line
+        # Load and print the integer at address $t1
+        lw      $t4, 0($t1)
+        jal     print_int
+        jal     print_line
 
-    addi    $t1, $t1, 4  # Move to the next element
-    addi    $s0, $s0, 1  # Increment loop counter
-    j       print_sorted_loop  # Repeat print loop
+        addi    $t1, $t1, 4  # Move to the next element
+        addi    $s0, $s0, 1  # Increment loop counter
+        j       print_sorted_loop  # Repeat print loop
 
 done:
         # Exit the program
