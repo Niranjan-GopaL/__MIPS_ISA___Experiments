@@ -33,34 +33,38 @@ move 	$t2, $t4		        # $t2 <- $t4
 
 
 move    $t8, $t1                # temporily store t1 -> t8
+move    $t7, $t2                # temporily store t2 -> t7
 move    $s0, $zero	            # loop vairable (i)  -> s0
 
 loop1:  
-        beq $s0, $t0, loop1end
+        beq $s0, $t0, loop1end # 
 
 	    jal print_enter_int_from_user
 	    jal get_input_int
         # store user inputs to an array starting from t1
 	    sw $t4, 0($t1)
+	    sw $t4, 0($t2)
 
 	    addi $t1, $t1, 4        # updating t1 to have t1 + 4 value
+	    addi $t2, $t2, 4        # updating t2 to have t2 + 4 value
       	addi $s0, $s0, 1        # s0++
         j loop1                 # jump to top
 
 loop1end: 
-        move $t1, $t8           # t1's value restored from t8  
+        move $t1, $t8           # t1'    value restored from t8  
+        move $t2, $t7           # t1's value restored from t8  
 
 
 
 
 
 
-#     for i: 0 -> n
-#         for j: 0 -> (n-i)-1
+#     for i: 1 -> n-1
+#         for j: 0 -> (n-1)-i
 #             if( A[j] > A[j+1] ) swap( A[j], A[j+1] )
 #     
 #     
-#     after every iteration of inner loop;
+#     after every i iteration of outer loop;
 #     (i+1)th  largest number will be at its proper position
 
 
@@ -95,67 +99,71 @@ loop1end:
 
 
 # outer loop initialisation
-li      $s0,  -1		
-addi	$t6, $t0, -1			    # $t6 <- N - 1
-
+li      $s0,  0		
+addi	$t5, $t2, 0			        # t5  <- temp_t2 
 
 outer_loop:
     addi    $s0, $s0, 1             # i++
-    beq     $s0, $t6, loop_to_populate_output
+    addi    $t2, $t5, 0             # restoring t2 back to start of array
+
+    # this is used rather loosely in-order to help in print_sorted_loop
+    li	    $s1, 0		            # j = 0
+
+    beq     $s0, $t0, print_sorted_loop
 
     # inner loop initialisation
     li	    $s1, 0		            # j = 0
-    sub		$t3, $t6, $s0		    # $t3 <- N-1 - i    ( you can do this using one register)
+    sub		$t3, $t0, $s0		    # $t3 <- N - i    ( you can do this using one register)
 
     inner_loop:
     beq     $s1, $t3, outer_loop    # j == N - i go to outer lopp
 
-
-    lw      $s3, 0($t1)             # A[j]
-    lw      $s4, 4($t1)             # A[j+1]
-
+    lw      $s3, 0($t2)             # s3 <- M[ t2 ]
+    lw      $s4, 4($t2)             # s4 <- M[t2+4]
 
     ble		$s3, $s4, no_swap       # Only if A[j] > A[j+1] we'll swap
 
     # swapping
-    move    $t7, $s4
-    move    $s4, $s3
-    move    $s3, $t7
+    sw		$s3, 4($t2)		        # s3 -> M[t2+4]
+    sw		$s4, 0($t2)		        # s4 -> M[ t2 ] 
 
     no_swap:
     addi     $s1, $s1, 1            # j++
+    addi     $t2, $t2, 4            # t2 += 4
     j		inner_loop				# next iteration of inner loop
 
-
-loop_to_populate_output:  
-        beq $s0, $t0, print_sorted_loop
-
-	    sw   $t1, 0($t2)
-
-	    addi $t1, $t1, 4            # updating t1 to have t1 + 4 value
-	    addi $t2, $t2, 4            # updating t2 to have t2 + 4 value
-      	addi $s0, $s0, 1            # s0++
-        j loop_to_populate_output   # jump to top
 
 
 
 print_sorted_loop:
-        li		$s0, 0		 
-        beq     $s0, $t0, done  # If i == N, exit
+        beq     $s1, $t0, done      # If i == N, exit
 
         # Load and print the integer at address $t1
         lw      $t4, 0($t2)
         jal     print_int
         jal     print_line
 
-        addi    $t2, $t2, 4         # Move to the next element
-        addi    $s0, $s0, 1         # Increment loop counter
-        j       print_sorted_loop   # Repeat print loop
+        addi    $t2, $t2, 4         # t2 += 4
+        addi    $s1, $s1, 1         # i++
+        j       print_sorted_loop   
 
 done:
         # Exit the program
         li      $v0, 10
         syscall
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -54,29 +54,6 @@ loop1:  beq $s7,$t1,loop1end
 loop1end: move $t2,$t8  # t2's value restored from t8  
 
 
-#############################################################
-#Do not change any code above this line
-#Occupied registers $t1,$t2,$t3. Don't use them in your sort function.
-#############################################################
-#function: should be written by students(sorting function)
-#The below function adds 10 to the numbers. You have to replace this with
-#your code
-
-
-lw $s3,0($t2)
-addi $s3,$s3,10
-sw $s3,0($t3)
-lw $s3,4($t2)
-addi $s3,$s3,10
-sw $s3,4($t3)
-
-
-
-
-#endfunction
-#############################################################
-#You need not change any code below this line
-
 
 
 #input from command line(takes input and stores it in $t6)
@@ -117,6 +94,30 @@ print_enter_int: li $v0,4
 		jr $ra
 
 
+#############################################################
+#Do not change any code above this line
+#Occupied registers $t1,$t2,$t3. Don't use them in your sort function.
+#############################################################
+#function: should be written by students(sorting function)
+#The below function adds 10 to the numbers. You have to replace this with
+#your code
+
+
+
+lw $s3,0($t2)
+addi $s3,$s3,10
+sw $s3,0($t3)
+lw $s3,4($t2)
+addi $s3,$s3,10
+sw $s3,4($t3)
+
+
+
+
+
+#endfunction
+#############################################################
+#You need not change any code below this line
 
 #print sorted numbers
 move $s7,$zero	#i = 0
