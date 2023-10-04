@@ -118,7 +118,7 @@ li		$s0, -1		        # $s0 -> 0  ( k )
 li		$s3, 0		        # $s3 -> 0  (row_offset)
 li		$s4, 0		        # $s4 -> 0  (clm_offset)
 addi	$t3, $zero, 4	    # $t3 = 4
-move    $t9, $t7            # temporarily sotring matrix C's address
+move    $t8, $t7            # temporarily sotring matrix C's address
 
 
 
@@ -197,7 +197,7 @@ j       outer_loop
 
 FUCKING_DONE_init__:
 li		$s1, 0		
-move    $t7, $t9
+move    $t7, $t8
 
 #jal     print_line
 jal     print_line
