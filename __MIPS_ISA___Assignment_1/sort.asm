@@ -69,34 +69,11 @@ loop1end:
 
 
 
-#    $t1 <----- stores StartingAddress for input
-#    
-#    M[t1  ] = first  input
-#    M[t1+4] = second input
-#    M[t1+8] = third  input
-#    
-#    M[26850128] = 4
-#    M[26850132] = 1
-#    M[26850136] = 2
-#    and so on ...
-#    
-#    
-#    => EVERYTHING IS ZERO INDEXED 
-
-
-
-
-
-
 
 # Bubble sort
 
-# just code; debug later
-
-# i <- s0 <- outer_loop variable
-# j <- s1 <- inner_loop variable
-
-
+# s0 <- outer_loop variable
+# s1 <- inner_loop variable
 
 # outer loop initialisation
 li      $s0,  0		
@@ -131,8 +108,6 @@ outer_loop:
     addi     $s1, $s1, 1            # j++
     addi     $t2, $t2, 4            # t2 += 4
     j		inner_loop				# next iteration of inner loop
-
-
 
 
 print_sorted_loop:
